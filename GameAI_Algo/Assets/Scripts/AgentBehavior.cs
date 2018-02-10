@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class AgentBehavior : MonoBehaviour {
 
-    public Dictionary<Node, Node> nodeParent = new Dictionary<Node, Node>();
+    IDictionary<Node, Node> nodeParent = new Dictionary<Node, Node>();
     public Node result;
 
-    public Material mat;
+    public Material BFSmaterial;
+    public Material DFSmaterial;
 
-	// Use this for initialization
-	void Start () {
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -22,25 +24,30 @@ public class AgentBehavior : MonoBehaviour {
 
     public void ShowBFSPath()
     {
-       
-        Node start = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Player").gameObject.transform.position);
-        Node goal = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Goal").gameObject.transform.position);
+        Node start = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Player").gameObject.transform.position);// GridBase.GetInstance().grid[0, 0]; //
+        Node goal = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Goal").gameObject.transform.position);//GridBase.GetInstance().grid[5, 5];//
 
         result = GetShortestPathBFS(start, goal);
-
-        if(result == start)
-        {
-            Debug.Log("BFS IS SUX");
-        }
-        else
-        {
-            Debug.Log("BFS IS NOT SUX");
-        }
         Node cur = result;
 
         while(cur != start)
         {
-            cur.tileMeshRenderer.material = mat;
+            cur.tileMeshRenderer.material = BFSmaterial;
+            cur = nodeParent[cur];
+        }
+    }
+
+    public void ShowDFSPath()
+    {
+        Node start = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Player").gameObject.transform.position);// GridBase.GetInstance().grid[0, 0]; //
+        Node goal = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Goal").gameObject.transform.position);//GridBase.GetInstance().grid[5, 5];//
+
+        result = GetShortestPathDFS(start, goal);
+        Node cur = result;
+
+        while (cur != start)
+        {
+            cur.tileMeshRenderer.material = DFSmaterial;
             cur = nodeParent[cur];
         }
     }
@@ -50,27 +57,70 @@ public class AgentBehavior : MonoBehaviour {
     Node GetShortestPathBFS(Node startPosition, Node GoalNode)
     {
         Queue<Node> queue = new Queue<Node>();
-        Queue<Node> exploredNodes = new Queue<Node>();
+        HashSet<Node> exploredNodes = new HashSet<Node>();
 
         queue.Enqueue(startPosition);
 
         while (queue.Count != 0)
         {
-            Node node = queue.Dequeue();
-            if(node == GoalNode)
+            Node currentNode = queue.Dequeue();
+            if(currentNode == GoalNode)
             {
-                return node;
+                return currentNode;
             }
 
-            List<Node> adjacentWalkableNodes = GridBase.GetInstance().GetWalkableAdjacentNodes(node);
+            List<Node> adjacentWalkableNodes = GridBase.GetInstance().GetWalkableAdjacentNodes(currentNode);
 
-            foreach(Node t_node in adjacentWalkableNodes)
+            foreach(Node node in adjacentWalkableNodes)
             {
                 if (!exploredNodes.Contains(node))
                 {
-                    exploredNodes.Enqueue(node);
-                    nodeParent.Add(t_node, node);
-                    queue.Enqueue(t_node);
+                    exploredNodes.Add(currentNode);
+                    if(nodeParent.ContainsKey(node))
+                    {
+                        nodeParent[node] = currentNode;
+                    }
+                    else
+                    {
+                        nodeParent.Add(node, currentNode);
+                    }
+                    
+                    queue.Enqueue(node);
+                }
+            }
+        }
+
+        return startPosition;
+    }
+
+    Node GetShortestPathDFS(Node startPosition, Node GoalNode)
+    {
+        Stack<Node> stack = new Stack<Node>();
+        HashSet<Node> exploredNodes = new HashSet<Node>();
+        stack.Push(startPosition);
+
+        while(stack.Count!=0)
+        {
+            Node currentNode = stack.Pop();
+            if (currentNode == GoalNode)
+                return currentNode;
+
+            List<Node> adjacentWalkableNodes = GridBase.GetInstance().GetWalkableAdjacentNodes(currentNode);
+
+            foreach(Node node in adjacentWalkableNodes)
+            {
+                if(!exploredNodes.Contains(node))
+                {
+                    exploredNodes.Add(node);
+                    if (nodeParent.ContainsKey(node))
+                    {
+                        nodeParent[node] = currentNode;
+                    }
+                    else
+                    {
+                        nodeParent.Add(node, currentNode);
+                    }
+                    stack.Push(node);
                 }
             }
         }

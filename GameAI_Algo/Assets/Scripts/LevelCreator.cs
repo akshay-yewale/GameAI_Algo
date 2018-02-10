@@ -108,6 +108,7 @@ public class LevelCreator : MonoBehaviour {
 			
                 
 				stackableObjCloneObj = Instantiate (stackableCloneObjectForMousePointer, worldPosition, Quaternion.identity) as GameObject;
+                //stackableObjCloneObj.tag = "";
                 //stackableObjProperties = stackableObjCloneObj.GetComponent <Level_Object> ();
 
 
@@ -124,6 +125,8 @@ public class LevelCreator : MonoBehaviour {
                         if(actualObjToPlaced.tag == "Player" || actualObjToPlaced.tag == "Goal")
                         {
                             curNode.isWalkable = true;
+                            Destroy(stackableObjCloneObj.gameObject);
+                            placeStackObj = false;
                         }
                         else
                         {

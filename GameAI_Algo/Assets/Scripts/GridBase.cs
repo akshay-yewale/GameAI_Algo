@@ -52,12 +52,11 @@ public class GridBase : MonoBehaviour {
                 Node node = new Node();
                 node.visualizer = go;
                 node.tileMeshRenderer = node.visualizer.GetComponentInChildren<MeshRenderer>();
-                node.isWalkable = false;
+                node.isWalkable = true;
                 node.nodePositionX = x;
                 node.nodePositionZ = z;
                 grid[x, z] = node;
-                node.isWalkable = false;
-
+              
             }
         }
     }
@@ -111,10 +110,10 @@ public class GridBase : MonoBehaviour {
         if (node.nodePositionZ != 0)
             possibleNodes.Add(grid[node.nodePositionX,node.nodePositionZ-1]);
 
-        if (node.nodePositionX > sizeX-1)
+        if (node.nodePositionX < sizeX-1)
             possibleNodes.Add(grid[node.nodePositionX+1, node.nodePositionZ]);
 
-        if (node.nodePositionZ > sizeZ - 1)
+        if (node.nodePositionZ < sizeZ - 1)
             possibleNodes.Add(grid[node.nodePositionX , node.nodePositionZ +1]);
 
 

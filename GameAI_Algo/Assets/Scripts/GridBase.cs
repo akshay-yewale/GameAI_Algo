@@ -105,7 +105,10 @@ public class GridBase : MonoBehaviour {
         List<Node> possibleNodes = new List<Node>();
 
         if(node.nodePositionX !=0)
+        {
         possibleNodes.Add(grid[node.nodePositionX - 1, node.nodePositionZ]);
+
+        }
 
         if (node.nodePositionZ != 0)
             possibleNodes.Add(grid[node.nodePositionX,node.nodePositionZ-1]);
@@ -121,6 +124,17 @@ public class GridBase : MonoBehaviour {
         {
             if (t_node.isWalkable == true)
                 result.Add(t_node);
+        }
+        return result;
+    }
+
+    public List<Node> GetAllWalkableNodes()
+    {
+        List<Node> result = new List<Node>();
+        foreach(Node node in grid)
+        {
+            if (node.isWalkable)
+                result.Add(node);
         }
         return result;
     }

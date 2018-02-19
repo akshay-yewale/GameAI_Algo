@@ -12,16 +12,24 @@ public class AgentBehavior : MonoBehaviour {
     public Material DFSmaterial;
     public Material AStarmaterial;
 
-
+    List<Node> movePlayerNodeList = new List<Node>();
+    private bool movePlayer = false;
+    GameObject player,goalGameObject;
+    private int currentIndex = 0;
 
     // Use this for initialization
     void Start () {
-		
+       
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+
+        if (movePlayer)
+        {
+            MovePlayerToGoal();
+        }
+
 	}
 
 
@@ -57,6 +65,8 @@ public class AgentBehavior : MonoBehaviour {
 
     public void ShowAStar()
     {
+        player = GameObject.FindGameObjectWithTag("Player").gameObject;
+        goalGameObject = GameObject.FindGameObjectWithTag("Goal").gameObject;
         Node start = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Player").gameObject.transform.position);// GridBase.GetInstance().grid[0, 0]; //
         Node goal = GridBase.GetInstance().NodeFromWorldPosition(GameObject.FindGameObjectWithTag("Goal").gameObject.transform.position);//GridBase.GetInstance().grid[5, 5];//
 
@@ -67,7 +77,10 @@ public class AgentBehavior : MonoBehaviour {
         {
             cur.tileMeshRenderer.material = AStarmaterial;
             cur = nodeParent[cur];
+            movePlayerNodeList.Add(cur);
         }
+        movePlayerNodeList.Reverse();
+
     }
 
     //BFS Implementation
@@ -223,5 +236,38 @@ public class AgentBehavior : MonoBehaviour {
                                 Mathf.Pow(start.nodePositionZ - end.nodePositionZ, 2));
 
         return result;
+    }
+
+    public void SetPlayerMoveToGoal()
+    {
+        movePlayer = true;
+    }
+
+    private void MovePlayerToGoal()
+    {
+        {
+            Vector3 goal = new Vector3(movePlayerNodeList[currentIndex].nodePositionX, 0, movePlayerNodeList[currentIndex].nodePositionZ);
+
+            Vector3 lookAtGoal = new Vector3(goal.x,
+                                           player.transform.position.y,
+                                           goal.z);
+            Vector3 direction = lookAtGoal - player.transform.position;
+
+            player.transform.rotation = Quaternion.Slerp(player.transform.rotation,
+                                                  Quaternion.LookRotation(direction),
+                                                  Time.deltaTime * 1.0f);
+
+            player.transform.Translate(0, 0, 0.25f * Time.deltaTime);
+
+            if((goal - player.transform.position).magnitude < 0.2f  && currentIndex<movePlayerNodeList.Count-1)
+            {
+                currentIndex++;
+            }
+
+            if((player.transform.position - goalGameObject.transform.position).magnitude < 1f)
+            {
+                movePlayer = false;
+            }
+        }
     }
 }

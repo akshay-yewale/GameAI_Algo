@@ -93,16 +93,23 @@ public class OctNode  {
         if(!containedItems.Contains(item))
         {
             containedItems.Add(item);
+            item.octreeNodes.Add(this);
+
         }
         if(containedItems.Count > maxObjectLimit)
         {
             Split();
+
             containedItems.Clear();
         }
     }
 
     void Split()
     {
+        foreach(OctreeItem item in containedItems)
+        {
+            item.octreeNodes.Remove(this);
+        }
         Vector3 positionVector = new Vector3(halfDimensionLenght / 2, halfDimensionLenght / 2, halfDimensionLenght / 2);
         for(int index = 0; index < 4; index++)
         {
